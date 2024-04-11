@@ -6,12 +6,16 @@ import { FunctionComponent } from "react";
 
 interface SearchBarProps {
   setMovies: (movies: Movie[]) => void;
+  handleSearch: (args: string) => void;
 }
 
-const SearchBar: FunctionComponent<SearchBarProps> = ({ setMovies }) => {
+const SearchBar: FunctionComponent<SearchBarProps> = ({
+  setMovies,
+  handleSearch,
+}) => {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = event.target.value;
-
+    handleSearch(newQuery);
     setTimeout(async () => {
       if (newQuery.length >= 3) {
         try {

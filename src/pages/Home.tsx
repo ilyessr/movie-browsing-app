@@ -4,17 +4,19 @@ import SideMenu from "../components/SideMenu";
 import SearchBar from "../components/SearchBar";
 import MovieItem from "../components/MovieItem";
 import MovieDetails from "../components/MovieDetails";
-import usePopularMovies from "../hooks/usePopularMovies";
+import { useTMDBService } from "../hooks/TMDBServices";
 
 const Home: FunctionComponent = () => {
+  const { usePopularMovies } = useTMDBService();
   const popularMovies = usePopularMovies();
-  const randomIndex = Math.floor(Math.random() * popularMovies.length);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>("");
   const classMarginLeft = isSideMenuOpen ? `ml-[352px]` : `ml-[24px]`;
 
   useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * popularMovies.length);
     setSelectedMovie(popularMovies[randomIndex] || null);
   }, [popularMovies]);
 
@@ -32,12 +34,17 @@ const Home: FunctionComponent = () => {
             Discover the latest movies, find detailed information about your
             favorite films, and much more !
           </p>
-          <SearchBar setMovies={setMovies} />
+          <SearchBar
+            setMovies={setMovies}
+            handleSearch={(e: string) => setSearch(e)}
+          />
           <div className="h-full overflow-auto">
             <div className="h-fit flex flex-col mb-20">
               {movies.length === 0 ? (
                 <p className="text-white text-center mt-8">
-                  No movies found. Try using the search bar to find movies.
+                  {search.length >= 3
+                    ? "No movies found. Try using the search bar to find movies."
+                    : ""}
                 </p>
               ) : (
                 movies.map((movie) => (

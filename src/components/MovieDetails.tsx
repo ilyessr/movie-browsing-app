@@ -1,17 +1,17 @@
 import React, { FunctionComponent } from "react";
 import Poster from "./Poster";
-import { useMovieDetail } from "../hooks/useMovieDetail";
-import { useGenres } from "../hooks/useGenres";
-import { useLanguages } from "../hooks/useLanguages";
-import { useMainActors } from "../hooks/useMainActors";
 import MovieDetailsNotFound from "./MovieDetailsNotFound";
 import MovieBackdrop from "./MovieBackdrop";
+import { useTMDBService } from "../hooks/TMDBServices";
 
 interface MovieDetailsProps {
   movieID: number;
 }
 
 const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
+  const { useGenres, useLanguages, useMovieDetail, useMainActors } =
+    useTMDBService();
+
   const genres = useGenres();
   const languages = useLanguages();
   const movie = useMovieDetail(movieID);
