@@ -1,7 +1,7 @@
-import React, { FunctionComponent } from "react";
-import { Slide } from "@mui/material";
+import React, { FunctionComponent, useEffect } from "react";
 import { ArrowLeft, ArrowRight } from "@mui/icons-material";
-import { WIDTH_EXTEND_BUTTON, WIDTH_SIDE_MENU } from "../env";
+import { WIDTH_EXTEND_BUTTON } from "../env";
+import useMobile from "../hooks/useMobile";
 
 interface SideMenuProps {
   children: React.ReactNode;
@@ -19,17 +19,17 @@ const SideMenu: FunctionComponent<SideMenuProps> = ({
   };
 
   return (
-    <div
-      className={`z-40 block fixed h-screen w-screen md:w-[352px] md:max-w-${WIDTH_SIDE_MENU}`}
-    >
-      <Slide direction="right" in={isSideMenuOpen}>
-        <div
-          id="side-menu"
-          className={`relative flex h-screen justify-between bg-black`}
-        >
-          <div className="flex p-4  md:py-4 w-full">{children}</div>
+    <div className="z-40 fixed h-screen">
+      <div
+        id="side-menu"
+        className={`${
+          isSideMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out fixed h-screen w-screen md:w-[352px] bg-black box-border`}
+      >
+        <div className="relative flex h-screen justify-between w-full">
+          <div className="flex pl-4 pt-4 pb-4 md:py-4 w-full">{children}</div>
           <div
-            className={`h-screen flex items-center justify-center bg-zinc-950 cursor-pointer`}
+            className="h-screen flex items-center justify-center bg-zinc-950 cursor-pointer w-6"
             onClick={handleToggleSideMenu}
           >
             <ArrowLeft
@@ -41,12 +41,11 @@ const SideMenu: FunctionComponent<SideMenuProps> = ({
             />
           </div>
         </div>
-      </Slide>
+      </div>
       <div
-        className={`fixed left-0 top-0 h-screen  w-${WIDTH_EXTEND_BUTTON} flex items-center justify-center bg-zinc-950 cursor-pointer`}
-        style={{
-          visibility: isSideMenuOpen ? "hidden" : "visible",
-        }}
+        className={`fixed left-0 top-0 h-screen flex items-center justify-center bg-zinc-950 cursor-pointer ${
+          isSideMenuOpen ? "hidden" : "block"
+        }`}
         onClick={handleToggleSideMenu}
       >
         <ArrowRight fontSize="medium" sx={{ color: "white" }} />

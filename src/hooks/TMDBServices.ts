@@ -1,137 +1,87 @@
-/*
-useGenres: Fetches a list of movie genres.
-useLanguages: Fetches a list of supported languages.
-useMainActors: Fetches the main actors of a specific movie by its ID.
-usePopularMovies: Fetches a list of popular movies, filtering out any adult content.
-useMovieDetail: Fetches detailed information about a specific movie by its ID.
-*/
-
 import { TMDB_API_KEY, TMDB_BASE_URL } from "../env";
 import { Genre, Language, Actor, Movie, MovieDetail } from "../types";
+import { useQuery } from "react-query";
+import axios from "axios";
 
-import { useEffect, useState } from "react";
+// Fetch Functions
+const fetchGenres = async (): Promise<Genre[]> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`
+  );
+  return data.genres;
+};
 
+const fetchLanguages = async (): Promise<Language[]> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/configuration/languages?api_key=${TMDB_API_KEY}`
+  );
+  return data;
+};
+
+const fetchMainActors = async (movieID: number): Promise<Actor[]> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/movie/${movieID}/credits?api_key=${TMDB_API_KEY}`
+  );
+  return data.cast.slice(0, 5);
+};
+
+const fetchPopularMovies = async (): Promise<Movie[]> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1&include_adult=false`
+  );
+  return data.results;
+};
+
+const fetchMovieDetail = async (movieId: number): Promise<MovieDetail> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`
+  );
+  return data;
+};
+
+const fetchMovieSearch = async (
+  query: string
+): Promise<{ results: Movie[] }> => {
+  const { data } = await axios.get(
+    `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}${query}`
+  );
+  return data;
+};
+
+// Hook Implementation
 export const useTMDBService = () => {
-  const fetchData = async (url: string) => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch data from ${url}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error(`Error fetching data from ${url}:`, error);
-      return null;
-    }
-  };
-
   const useGenres = () => {
-    const [genres, setGenres] = useState<Genre[]>([]);
-
-    useEffect(() => {
-      const fetchGenres = async () => {
-        try {
-          const data = await fetchData(
-            `${TMDB_BASE_URL}/genre/movie/list?api_key=${TMDB_API_KEY}`
-          );
-          setGenres(data?.genres || null);
-        } catch (error) {
-          console.error("Failed to fetch genres:", error);
-        }
-      };
-
-      fetchGenres();
-    }, []);
-
-    return genres;
+    return useQuery<Genre[], Error>("genres", fetchGenres);
   };
 
   const useLanguages = () => {
-    const [languages, setLanguages] = useState<Language[]>([]);
-
-    useEffect(() => {
-      const fetchLanguages = async () => {
-        try {
-          const data = await fetchData(
-            `${TMDB_BASE_URL}/configuration/languages?api_key=${TMDB_API_KEY}`
-          );
-          setLanguages(data || null);
-        } catch (error) {
-          console.error("Failed to fetch languages:", error);
-        }
-      };
-
-      fetchLanguages();
-    }, []);
-
-    return languages;
+    return useQuery<Language[], Error>("languages", fetchLanguages);
   };
 
   const useMainActors = (movieID: number) => {
-    const [actors, setActors] = useState<Actor[]>([]);
-
-    useEffect(() => {
-      const fetchActors = async () => {
-        try {
-          const data = await fetchData(
-            `${TMDB_BASE_URL}/movie/${movieID}/credits?api_key=${TMDB_API_KEY}`
-          );
-          setActors(data && data.cast ? data.cast.slice(0, 5) : null);
-        } catch (error) {
-          console.error("Failed to fetch main actors:", error);
-        }
-      };
-
-      fetchActors();
-    }, [movieID]);
-
-    return actors;
+    return useQuery<Actor[], Error>(["mainActors", movieID], () =>
+      fetchMainActors(movieID)
+    );
   };
 
   const usePopularMovies = () => {
-    const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
-
-    useEffect(() => {
-      const fetchPopularMovies = async () => {
-        try {
-          const response = await fetch(
-            `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&language=en-US&page=1`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch popular movies");
-          }
-          const data = await response.json();
-          setPopularMovies(data.results);
-        } catch (error) {
-          console.error("Failed to fetch popular movies:", error);
-        }
-      };
-
-      fetchPopularMovies();
-    }, []);
-
-    return popularMovies;
+    return useQuery<Movie[], Error>("popularMovies", fetchPopularMovies);
   };
 
   const useMovieDetail = (movieId: number) => {
-    const [movieDetail, setMovieDetail] = useState<MovieDetail | null>(null);
+    return useQuery<MovieDetail, Error>(["movieDetail", movieId], () =>
+      fetchMovieDetail(movieId)
+    );
+  };
 
-    useEffect(() => {
-      const fetchMovieDetail = async () => {
-        try {
-          const data = await fetchData(
-            `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}`
-          );
-          setMovieDetail(data || null);
-        } catch (error) {
-          console.error("Failed to fetch movie detail:", error);
-        }
-      };
-
-      fetchMovieDetail();
-    }, [movieId]);
-
-    return movieDetail;
+  const useMovieSearch = (query: string) => {
+    return useQuery<{ results: Movie[] }, Error>(
+      ["movieSearch", query],
+      () => fetchMovieSearch(query),
+      {
+        enabled: !!query, // Only fetch if the query is not empty
+      }
+    );
   };
 
   return {
@@ -140,5 +90,6 @@ export const useTMDBService = () => {
     useMainActors,
     usePopularMovies,
     useMovieDetail,
+    useMovieSearch,
   };
 };

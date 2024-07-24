@@ -3,29 +3,74 @@ import Poster from "./Poster";
 import MovieDetailsNotFound from "./MovieDetailsNotFound";
 import MovieBackdrop from "./MovieBackdrop";
 import { useTMDBService } from "../hooks/TMDBServices";
+import { CircularProgress, IconButton } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 interface MovieDetailsProps {
   movieID: number;
+  setSelectedMovieId: (id: number | null) => void;
 }
 
-const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
+const MovieDetails: FunctionComponent<MovieDetailsProps> = ({
+  movieID,
+  setSelectedMovieId,
+}) => {
   const { useGenres, useLanguages, useMovieDetail, useMainActors } =
     useTMDBService();
 
-  const genres = useGenres();
-  const languages = useLanguages();
-  const movie = useMovieDetail(movieID);
-  const cast = useMainActors(movieID);
+  const {
+    data: genres,
+    error: genresError,
+    isLoading: genresLoading,
+  } = useGenres();
+  const {
+    data: languages,
+    error: languagesError,
+    isLoading: languagesLoading,
+  } = useLanguages();
+  const {
+    data: movie,
+    error: movieError,
+    isLoading: movieLoading,
+  } = useMovieDetail(movieID);
+  const {
+    data: cast,
+    error: castError,
+    isLoading: castLoading,
+  } = useMainActors(movieID);
 
-  if (!movie) {
-    return <MovieDetailsNotFound />;
+  if (movieLoading || genresLoading || languagesLoading || castLoading) {
+    return (
+      <div className="flex flex-grow items-center justify-center h-full w-full">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (movieError || genresError || languagesError || castError || !movie) {
+    const errorMessage = movieError
+      ? "Movie details could not be fetched."
+      : genresError
+      ? "Genres could not be fetched."
+      : languagesError
+      ? "Languages could not be fetched."
+      : castError
+      ? "Cast details could not be fetched."
+      : "Movie details not found.";
+    return <MovieDetailsNotFound message={errorMessage} />;
   }
 
   return (
-    <>
+    <div className="relative">
       <MovieBackdrop movie={movie} />
-
-      <div className="flex flex-grow w-full mx-auto px-4 md:px-6 lg:px-8 xl:px-10 py-4 md:py-8">
+      <IconButton
+        className="absolute top-4 right-4 z-10"
+        onClick={() => setSelectedMovieId(null)}
+        style={{ position: "absolute", top: "16px", right: "16px", zIndex: 10 }}
+      >
+        <ArrowBackIcon style={{ color: "white", fontSize: "30px" }} />
+      </IconButton>
+      <div className="relative flex flex-grow w-full mx-auto px-4 md:px-6 lg:px-8 xl:px-10 py-4 md:py-8">
         <div className="overflow-hidden flex flex-col lg:flex-row h-fit w-full ">
           <div
             data-testid="movie-poster"
@@ -39,9 +84,9 @@ const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
           </div>
           <div className="w-full flex flex-col md:ml-10">
             <div className="flex flex-wrap items-center md:mb-4">
-              {movie.genres.map((movieGenre) => {
+              {movie.genres?.map((movieGenre) => {
                 const matchingGenre = genres
-                  .find((apiGenre) => apiGenre.id === movieGenre.id)
+                  ?.find((apiGenre) => apiGenre.id === movieGenre.id)
                   ?.name.replace(/\s/g, "\u00A0");
                 return (
                   matchingGenre && (
@@ -55,12 +100,12 @@ const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
                 );
               })}
             </div>
-            <div className="border-t border-b border-gray-300 py-4 my-4  flex text-white justify-between flex-col">
+            <div className="border-t border-b border-gray-300 py-4 my-4 flex text-white justify-between flex-col">
               {movie.original_language && (
                 <p className="mr-2">
                   <span className="font-semibold">Original Language: </span>{" "}
                   {
-                    languages.find(
+                    languages?.find(
                       (lang) => lang.iso_639_1 === movie.original_language
                     )?.english_name
                   }
@@ -83,7 +128,7 @@ const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
             <div className="mb-4 text-white">
               <p className="text-lg font-semibold my-2">Cast:</p>
               <ul className="flex flex-wrap">
-                {cast.map((actor) => (
+                {cast?.map((actor) => (
                   <li key={actor.id} className="mr-5 mb-4">
                     <div className="flex items-center">
                       {actor.profile_path && (
@@ -105,7 +150,7 @@ const MovieDetails: FunctionComponent<MovieDetailsProps> = ({ movieID }) => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
