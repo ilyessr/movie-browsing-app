@@ -1,17 +1,14 @@
 import { FunctionComponent } from "react";
+import { useNavigate } from "react-router-dom";
 import { Movie } from "../types";
 import { useTMDBService } from "../hooks/TMDBServices";
 import { CircularProgress } from "@mui/material";
 import RatingStars from "./RatingStars";
 
-interface MoviePopularsProps {
-  setSelectedMovieId: (id: number | null) => void;
-}
-
-const MoviePopulars: FunctionComponent<MoviePopularsProps> = ({
-  setSelectedMovieId,
-}) => {
+const MoviePopulars: FunctionComponent = () => {
   const { usePopularMovies } = useTMDBService();
+  const navigate = useNavigate();
+
   const {
     data: popularMovies,
     error: popularMoviesError,
@@ -43,18 +40,18 @@ const MoviePopulars: FunctionComponent<MoviePopularsProps> = ({
         Discover the most popular movies of the moment. Click on a movie for
         more details.
       </p>
-      <div className="max-w-screen-lg mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5  gap-4">
+      <div className="max-w-screen-lg mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {popularMovies?.map((movie: Movie) => (
           <div
             key={movie.id}
-            className="w-full sm:w-full m-auto bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
-            onClick={() => setSelectedMovieId(movie.id)}
+            className="w-full bg-gray-800 text-white rounded-lg overflow-hidden shadow-lg cursor-pointer transform transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
+            onClick={() => navigate(`/movie/${movie.id}`)}
             role="button"
             tabIndex={0}
             aria-label={`Select movie ${movie.title}`}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
-                setSelectedMovieId(movie.id);
+                navigate(`/movie/${movie.id}`);
               }
             }}
           >
