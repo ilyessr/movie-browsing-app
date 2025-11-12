@@ -1,15 +1,16 @@
 import { FunctionComponent, useState, Suspense, lazy } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { Movie } from "../types";
 import SearchBar from "../components/SearchBar";
 import MovieItem from "../components/MovieItem";
 import MoviePopulars from "../components/MoviePopulars";
 
 const SideMenu = lazy(() => import("../components/SideMenu"));
-const MovieDetails = lazy(() => import("../components/MovieDetails"));
 
 const Home: FunctionComponent = () => {
+  const navigate = useNavigate();
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const classMarginLeft = isSideMenuOpen ? `ml-[352px]` : `ml-[24px]`;
@@ -46,7 +47,9 @@ const Home: FunctionComponent = () => {
                     <MovieItem
                       key={movie.id}
                       movie={movie}
-                      setSelectedMovie={() => setSelectedMovieId(movie.id)}
+                      setSelectedMovie={(movie) =>
+                        navigate(`/movie/${movie.id}`)
+                      }
                       setIsSideMenuOpen={setIsSideMenuOpen}
                     />
                   ))
@@ -60,16 +63,7 @@ const Home: FunctionComponent = () => {
       <div
         className={`flex flex-col ${classMarginLeft} h-full w-auto mb-[80px]`}
       >
-        <Suspense fallback={<div>Loading Movie Details...</div>}>
-          {selectedMovieId ? (
-            <MovieDetails
-              movieID={selectedMovieId}
-              setSelectedMovieId={setSelectedMovieId}
-            />
-          ) : (
-            <MoviePopulars setSelectedMovieId={setSelectedMovieId} />
-          )}
-        </Suspense>
+        <MoviePopulars />
       </div>
     </div>
   );
