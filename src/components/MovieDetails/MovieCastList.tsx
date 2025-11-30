@@ -14,7 +14,7 @@ const MovieCastList = ({ cast }: Props) => {
 
       <div className="relative">
         <div className="overflow-x-auto pb-4 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
-          <ul className="flex gap-5 sm:gap-6 md:gap-8">
+          <ul className="flex gap-3">
             {cast.map((actor) => (
               <li
                 key={actor.id}
