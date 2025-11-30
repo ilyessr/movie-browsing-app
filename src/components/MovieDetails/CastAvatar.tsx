@@ -22,7 +22,7 @@ const CastAvatar = ({ profilePath, alt, width = 128 }: Props) => {
           onError={(e) => (e.currentTarget.style.display = "none")}
         />
       ) : (
-        <Fallback width={w} height={`calc(${w} * 1.5)`} rounded="rounded-md" />
+        <Fallback width="w-full" height="h-full" rounded="rounded-md" />
       )}
     </div>
   );

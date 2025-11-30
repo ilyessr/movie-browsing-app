@@ -22,11 +22,17 @@ const MovieCastList = ({ cast }: Props) => {
               >
                 <CastAvatar profilePath={actor.profile_path} alt={actor.name} />
 
-                <div className="mt-3 min-h-[60px] flex flex-col justify-start text-center">
-                  <p className="font-semibold text-white text-sm sm:text-base line-clamp-1">
+                <div className="mt-3 min-h-[60px] flex flex-col justify-start text-center w-full max-w-32">
+                  <p
+                    title={actor.name}
+                    className="font-semibold text-white text-sm sm:text-base truncate"
+                  >
                     {actor.name}
                   </p>
-                  <p className="text-gray-400 text-xs sm:text-sm line-clamp-2">
+                  <p
+                    title={actor.character}
+                    className="text-gray-400 text-xs sm:text-sm line-clamp-2"
+                  >
                     {actor.character}
                   </p>
                 </div>
