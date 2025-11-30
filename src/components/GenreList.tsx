@@ -21,7 +21,7 @@ import {
   MdMovie,
 } from "react-icons/md";
 
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useFilter } from "../context/FilterContext";
 import { Genre } from "../types";
 import { IconType } from "react-icons";

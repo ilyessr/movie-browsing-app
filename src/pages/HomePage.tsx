@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import MovieGrid from "../components/MovieGrid";
 import Layout from "../layout/Layout";
 import { useFilter } from "../context/FilterContext";
@@ -8,9 +7,6 @@ import { usePopularMovies } from "../api/hooks/usePopularMovies";
 
 const HomePage = () => {
   const { selectedGenreId } = useFilter();
-  const location = useLocation();
-
-  const isPopular = location.pathname === "/popular";
   const isGenreSelected = selectedGenreId !== 0;
 
   const {
