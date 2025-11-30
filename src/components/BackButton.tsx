@@ -33,9 +33,7 @@ const BackButton = () => {
       aria-label="Go back"
       className="inline-flex items-center gap-2 sm:gap-3 rounded-full border border-white/15 bg-black/60 px-3 sm:px-5 py-1.5 sm:py-2 text-sm sm:text-base text-white shadow-lg shadow-black/30 backdrop-blur-lg transition-all duration-200 hover:bg-black/70 hover:border-amber-400 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
     >
-      <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-white/10">
-        <FiArrowLeft className="text-base sm:text-lg" />
-      </span>
+      <FiArrowLeft className="text-base sm:text-lg" />
       <span className="font-semibold tracking-wide">Back</span>
     </button>
   );
