@@ -36,6 +36,9 @@ jobs:
           # Set your repo name here if deploying as a project site (https://<user>.github.io/<repo>)
           VITE_BASE_PATH: /movie-browsing-app/
 
+      - name: Add SPA fallback
+        run: cp dist/index.html dist/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
