@@ -1,50 +1,35 @@
-# Movie browsing application
+# Movie Browsing App
 
-This project has been created using Vite, TypeScript, and React, with a focus on responsive design.
+Discover, search, and browse movies with details, casts, and ratings from TMDB. The app is responsive, fast, and keeps data fresh with smart caching for a smooth experience on desktop and mobile.
 
-## Description
+## Features
 
-This project is a Single Page Application for browsing movies, developed using Vite, TypeScript, and React, emphasizing responsive design. The application features a simple interface allowing users to effortlessly browse movies and search for specific titles. This project utilizes The Movie Database (themovieDB) API to enhance search functionality, enabling users to efficiently explore and discover movies.
+- Search bar to quickly find any movie
+- Browse by genre with a scrollable genre list
+- Quick access to popular movies
+- Detailed pages with cast/crew, ratings, and meta info
 
-## Installation
+## Live Demo
 
-To set up and execute the project locally, follow these steps:
+[https://ilyessr.github.io/movie-browsing-app/](https://ilyessr.github.io/movie-browsing-app/)
 
-1. Clone the repository to your local machine:
+## Stack
 
-```bash
-git clone git@github.com:ilyessr/movie-browsing-app.git
+- React 18 + TypeScript (Vite)
+- React Router v7
+- TanStack Query (data fetching/cache)
+- TailwindCSS for styling
+- Axios for API calls
 
-```
-
-2. Navigate into the project directory:
-
-```bash
-cd movie-browsing-app
-
-```
-
-3. Install dependencies using yarn
+## Getting Started
 
 ```bash
-yarn
-
+npm install
+npm run dev
 ```
 
-## Usage
-
-To launch the project, run the following command:
+## Build
 
 ```bash
-yarn dev
-
+npm run build
 ```
-
-This command will launch the development server and open the application in your default web browser.
-
-## Technologies Used
-
-- React
-- Typescript
-- Vite
-- Tailwind
