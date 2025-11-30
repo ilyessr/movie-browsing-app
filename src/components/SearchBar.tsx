@@ -1,125 +1,107 @@
-import { Genre, Movie } from "../types";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SearchRounded } from "@mui/icons-material";
-import { FunctionComponent, useState, useEffect, useRef } from "react";
-import { useTMDBService } from "../hooks/TMDBServices";
-import { CircularProgress } from "@mui/material";
+import { useClickOutside } from "../hooks/useClickOutside";
+import Fallback from "../components/Fallback";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMovieSearch } from "../api/hooks";
 
-interface SearchBarProps {
-  setMovies: (movies: Movie[]) => void;
-  handleSearch: (query: string) => void;
-}
+const SearchBar = () => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
-const SearchBar: FunctionComponent<SearchBarProps> = ({
-  setMovies,
-  handleSearch,
-}) => {
-  const { useGenres, useMovieSearch } = useTMDBService();
-  const {
-    data: genres,
-    error: genresError,
-    isLoading: genresLoading,
-  } = useGenres();
-  const [selectedGenre, setSelectedGenre] = useState<Genre>();
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
 
-  // Compute the search query based on the current query and selected genre
-  const searchQuery =
-    query.length >= 3
-      ? `&query=${query}${selectedGenre ? `&with_genres=${selectedGenre}` : ""}`
-      : "";
+  useClickOutside(wrapperRef, () => setFocused(false));
+  const debounceRef = useRef<number | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  // Use the hook to get movie search data
-  const {
-    data: movieData,
-    error: movieError,
-    isLoading: movieLoading,
-  } = useMovieSearch(searchQuery);
+  const { data } = useMovieSearch(debouncedQuery);
 
-  // Update movies whenever movieData changes
+  const results = data?.results;
+
   useEffect(() => {
-    if (movieData) {
-      console.log(movieData.results);
-      console.log({ selectedGenre });
-      const filteredMovies = selectedGenre
-        ? movieData.results.filter((movie) =>
-            movie.genre_ids.includes(selectedGenre.id)
-          )
-        : movieData.results;
-      console.log("filteredMovies", filteredMovies);
-      setMovies(filteredMovies);
-    } else {
-      setMovies([]);
-    }
-  }, [movieData, setMovies, selectedGenre]);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-  // Debounced search handler to avoid excessive API calls
-  const debouncedSearch = useRef((newQuery: string) => {
-    const handler = setTimeout(() => {
-      handleSearch(newQuery);
-    }, 500);
+    debounceRef.current = window.setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 300);
+
     return () => {
-      clearTimeout(handler);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }).current;
+  }, [query]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = event.target.value;
-    setQuery(newQuery);
-    debouncedSearch(newQuery);
-  };
+  const showDropdown =
+    focused && debouncedQuery.length >= 3 && results && results.length > 0;
 
   return (
-    <div className="relative mb-6">
-      {/* Display the progress spinner if genres are loading */}
-      {(genresLoading || movieLoading) && (
-        <div className="absolute top-52 left-1/2 transform -translate-x-1/2 flex items-center justify-center z-10  dark:bg-gray-700 opacity-75">
-          <CircularProgress />
-        </div>
-      )}
+    <div ref={wrapperRef} className="relative mb-6">
+      <div className="flex items-center bg-gray-900 border border-zinc-700 rounded-xl px-4">
+        <SearchRounded className="pointer-events-none" />
 
-      {/* Display the error messages if any */}
-      {genresError && (
-        <div className="absolute top-52 left-1/2 transform -translate-x-1/2  flex items-center justify-center z-10 bg-gray-50 dark:bg-gray-700">
-          <div>Error loading genres</div>
-        </div>
-      )}
-
-      {movieError && (
-        <div className="absolute top-52 left-1/2 transform -translate-x-1/2  flex items-center justify-center z-10 text-white dark:bg-gray-700">
-          <div>Error fetching movies</div>
-        </div>
-      )}
-
-      <div className="flex items-center border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white focus-within:ring-blue-500 focus-within:border-blue-500">
-        <div className="flex items-center ps-3 pointer-events-none">
-          <SearchRounded />
-        </div>
         <input
           type="search"
-          id="search-input"
           value={query}
-          onChange={handleInputChange}
-          className="w-3/4 p-4 text-sm text-gray-900 bg-gray-50 border-0 rounded dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white focus:ring-0 outline-none"
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
           placeholder="Search a movie..."
-          required
+          className="w-full p-4 text-sm text-white bg-gray-900 outline-none"
         />
-        <select
-          value={selectedGenre?.id}
-          onChange={(e) => {
-            setSelectedGenre(
-              genres?.find((genre) => genre.id === parseInt(e.target.value))
-            );
-          }}
-          className="w-24 p-4 text-sm text-gray-900 bg-gray-50 border-0 rounded dark:bg-gray-700 dark:placeholder-gray-400 dark:text-white focus:ring-0"
-        >
-          <option value="">All Genres</option>
-          {genres?.map((genre) => (
-            <option key={genre.id} value={genre.id}>
-              {genre.name}
-            </option>
-          ))}
-        </select>
       </div>
+
+      {/* DROPDOWN */}
+      <AnimatePresence>
+        {showDropdown && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            className="
+              absolute mt-2 w-full max-h-[320px] overflow-y-auto
+              bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-30
+              scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800
+            "
+          >
+            {results.slice(0, 10).map((movie) => (
+              <li
+                key={movie.id}
+                onClick={() => {
+                  navigate(`/movie/${movie.id}`);
+                  setFocused(false);
+                }}
+                className="
+                  flex items-center gap-4 px-4 py-2 cursor-pointer
+                  hover:bg-gray-800 transition-colors duration-100
+                "
+              >
+                {movie.poster_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`}
+                    alt={movie.title}
+                    className="w-10 h-14 object-cover rounded-md shadow-md"
+                  />
+                ) : (
+                  <Fallback width="40px" height="56px" rounded="rounded-md" />
+                )}
+
+                <div className="flex flex-col">
+                  <span className="font-semibold text-white text-sm line-clamp-1">
+                    {movie.title}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {movie.release_date
+                      ? new Date(movie.release_date).getFullYear()
+                      : "Unknown year"}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

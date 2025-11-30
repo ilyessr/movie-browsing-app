@@ -1,6 +1,12 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .scrollbar-custom {
+    @apply scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-900 rounded-md hover:scrollbar-thumb-yellow-400;
+  }
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

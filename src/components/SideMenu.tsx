@@ -1,56 +1,34 @@
-import React, { FunctionComponent, useEffect } from "react";
-import { ArrowLeft, ArrowRight } from "@mui/icons-material";
-import { WIDTH_EXTEND_BUTTON } from "../env";
-import useMobile from "../hooks/useMobile";
+import { useGenres } from "../api/hooks/useGenres";
+import GenreList from "./GenreList";
+import SearchBar from "./SearchBar";
+import DiscoverSection from "./DiscoverSection";
 
-interface SideMenuProps {
-  children: React.ReactNode;
-  isSideMenuOpen: boolean;
-  setIsSideMenuOpen: (arg: boolean) => void;
-}
-
-const SideMenu: FunctionComponent<SideMenuProps> = ({
-  children,
-  isSideMenuOpen,
-  setIsSideMenuOpen,
-}) => {
-  const handleToggleSideMenu = () => {
-    setIsSideMenuOpen(!isSideMenuOpen);
-  };
+const SideMenu = ({ isSideMenuOpen }: { isSideMenuOpen: boolean }) => {
+  const { data: genres } = useGenres();
 
   return (
-    <div className="z-40 fixed h-screen">
-      <div
-        id="side-menu"
-        className={`${
-          isSideMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out fixed h-screen w-screen md:w-[352px] bg-black box-border`}
-      >
-        <div className="relative flex h-screen justify-between w-full">
-          <div className="flex pl-4 pt-4 pb-4 md:py-4 w-full">{children}</div>
-          <div
-            className="h-screen flex items-center justify-center bg-zinc-950 cursor-pointer w-6"
-            onClick={handleToggleSideMenu}
-          >
-            <ArrowLeft
-              fontSize="medium"
-              sx={{
-                color: "white",
-                visibility: isSideMenuOpen ? "visible" : "hidden",
-              }}
-            />
-          </div>
+    <aside
+      className={`
+        fixed left-0 top-0 h-screen
+        bg-gray-950 text-white
+        overflow-hidden
+        transition-all duration-300 ease-in-out z-50 pt-16 sm:pt-0
+        ${isSideMenuOpen ? "w-80" : "w-0"}
+      `}
+    >
+      <div className="p-4 w-80 h-full flex flex-col gap-4">
+        <p className="text-center text-sm sm:mt-4">
+          Discover the latest movies, find detailed information about your
+          favorite films, and much more!
+        </p>
+        <SearchBar />
+
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-custom pr-1 space-y-4">
+          <DiscoverSection />
+          {genres && <GenreList genres={genres} />}
         </div>
       </div>
-      <div
-        className={`fixed left-0 top-0 h-screen flex items-center justify-center bg-zinc-950 cursor-pointer ${
-          isSideMenuOpen ? "hidden" : "block"
-        }`}
-        onClick={handleToggleSideMenu}
-      >
-        <ArrowRight fontSize="medium" sx={{ color: "white" }} />
-      </div>
-    </div>
+    </aside>
   );
 };
 

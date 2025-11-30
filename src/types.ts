@@ -15,6 +15,13 @@ export type Movie = {
   vote_average: number;
 };
 
+export interface ApiResponse<T> {
+  page: number;
+  results: T[];
+  total_pages: number;
+  total_results: number;
+}
+
 export type Genre = {
   id: number;
   name: string;
@@ -30,10 +37,7 @@ export type MovieDetail = {
     backdrop_path: string;
   } | null;
   budget: number;
-  genres: {
-    id: number;
-    name: string;
-  }[];
+  genres: Genre[];
   homepage: string;
   id: number;
   imdb_id: string;
@@ -86,5 +90,41 @@ export type Actor = {
   order: number;
   original_name: string;
   popularity: number;
-  profile_path: string | null; // Le chemin peut être une chaîne ou null
+  profile_path: string | null;
 };
+
+export interface MovieDetailWithCredits {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  runtime: number;
+  release_date: string;
+  tagline: string;
+  genres: { id: number; name: string }[];
+  vote_average: number;
+  vote_count: number;
+  credits: {
+    cast: Actor[];
+    crew: CrewMember[];
+  };
+
+  spoken_languages: {
+    iso_639_1: string;
+    english_name: string;
+  }[];
+
+  production_countries: {
+    iso_3166_1: string;
+    name: string;
+  }[];
+}
+
+export interface CrewMember {
+  id: number;
+  name: string;
+  job: string;
+  department: string;
+  profile_path: string | null;
+}

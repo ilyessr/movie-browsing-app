@@ -1,72 +1,55 @@
-import { FunctionComponent, useState, Suspense, lazy } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import MovieGrid from "../components/MovieGrid";
+import Layout from "../layout/Layout";
+import { useFilter } from "../context/FilterContext";
+import { genresData } from "../data/genreMetadata";
+import { useMoviesByGenre } from "../api/hooks";
+import { usePopularMovies } from "../api/hooks/usePopularMovies";
 
-import { Movie } from "../types";
-import SearchBar from "../components/SearchBar";
-import MovieItem from "../components/MovieItem";
-import MoviePopulars from "../components/MoviePopulars";
+const HomePage = () => {
+  const { selectedGenreId } = useFilter();
+  const location = useLocation();
 
-const SideMenu = lazy(() => import("../components/SideMenu"));
+  const isPopular = location.pathname === "/popular";
+  const isGenreSelected = selectedGenreId !== 0;
 
-const Home: FunctionComponent = () => {
-  const navigate = useNavigate();
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [isSideMenuOpen, setIsSideMenuOpen] = useState<boolean>(true);
-  const [search, setSearch] = useState<string>("");
-  const classMarginLeft = isSideMenuOpen ? `ml-[352px]` : `ml-[24px]`;
+  const {
+    data: moviesOfGenre,
+    isLoading: genreLoading,
+    error: genreError,
+  } = useMoviesByGenre(selectedGenreId);
+
+  const {
+    data: popularMovies,
+    isLoading: popularLoading,
+    error: popularError,
+  } = usePopularMovies();
+
+  let title = "Popular";
+  let subtitle = "Discover trending films loved by many viewers.";
+
+  // GENRE PRIORITY
+  if (isGenreSelected) {
+    const genre = genresData[selectedGenreId];
+    title = genre?.name ?? "Genre";
+    subtitle = genre?.description ?? "Explore movies of this genre.";
+  }
+
+  const movies = isGenreSelected ? moviesOfGenre : popularMovies;
+  const loading = isGenreSelected ? genreLoading : popularLoading;
+  const error = isGenreSelected ? genreError : popularError;
 
   return (
-    <div className="h-full bg-gray-900">
-      <Suspense fallback={<div>Loading Side Menu...</div>}>
-        <SideMenu
-          isSideMenuOpen={isSideMenuOpen}
-          setIsSideMenuOpen={setIsSideMenuOpen}
-        >
-          <div className="w-full">
-            <h1 className="text-center text-xl font-semibold text-yellow-500 my-4 uppercase">
-              Welcome to our movie application
-            </h1>
-            <p className="text-center text-base text-white mb-4">
-              Discover the latest movies, find detailed information about your
-              favorite films, and much more!
-            </p>
-            <SearchBar
-              setMovies={setMovies}
-              handleSearch={(e: string) => setSearch(e)}
-            />
-            <div className="h-full overflow-auto">
-              <div className="h-fit flex flex-col mb-20">
-                {movies.length === 0 ? (
-                  <p className="text-white text-center mt-8">
-                    {search.length >= 3
-                      ? "No movies found. Try using the search bar to find movies."
-                      : ""}
-                  </p>
-                ) : (
-                  movies.map((movie) => (
-                    <MovieItem
-                      key={movie.id}
-                      movie={movie}
-                      setSelectedMovie={(movie) =>
-                        navigate(`/movie/${movie.id}`)
-                      }
-                      setIsSideMenuOpen={setIsSideMenuOpen}
-                    />
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </SideMenu>
-      </Suspense>
-
-      <div
-        className={`flex flex-col ${classMarginLeft} h-full w-auto mb-[80px]`}
-      >
-        <MoviePopulars />
-      </div>
-    </div>
+    <Layout>
+      <MovieGrid
+        movies={movies ?? []}
+        title={title}
+        subtitle={subtitle}
+        isLoading={loading}
+        error={error}
+      />
+    </Layout>
   );
 };
 
-export default Home;
+export default HomePage;
