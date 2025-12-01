@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchPopularMovies } from "../movies";
 
-export const usePopularMovies = () => {
+export const usePopularMovies = (page: number) => {
   return useQuery({
-    queryKey: ["popularMovies"],
-    queryFn: fetchPopularMovies,
+    queryKey: ["popularMovies", page],
+    queryFn: () => fetchPopularMovies(page),
   });
 };

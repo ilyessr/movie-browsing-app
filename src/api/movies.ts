@@ -19,20 +19,26 @@ export const fetchMovieDetailWithCredits = async (
   return data;
 };
 
-export const fetchPopularMovies = async (): Promise<Movie[]> => {
+export const fetchPopularMovies = async (
+  page = 1
+): Promise<ApiResponse<Movie>> => {
   const { data } = await tmdbApi.get("/movie/popular", {
-    params: { language: "en-US", page: 1, include_adult: false },
+    params: { language: "en-US", page, include_adult: false },
   });
-  return data.results;
+  return data;
 };
 
-export const fetchMoviesByGenre = async (genreId: number): Promise<Movie[]> => {
+export const fetchMoviesByGenre = async (
+  genreId: number,
+  page = 1
+): Promise<ApiResponse<Movie>> => {
   const { data } = await tmdbApi.get("/discover/movie", {
     params: {
       with_genres: genreId,
       language: "en-US",
       sort_by: "popularity.desc",
+      page,
     },
   });
-  return data.results;
+  return data;
 };

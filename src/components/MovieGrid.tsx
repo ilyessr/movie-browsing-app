@@ -1,6 +1,7 @@
 import CircularLoader from "./CircularLoader";
 import MovieCard from "./MovieCard";
 import { Movie } from "../types";
+import Pagination from "./Pagination";
 
 interface MovieGridProps {
   movies: Movie[];
@@ -8,6 +9,9 @@ interface MovieGridProps {
   subtitle: string;
   isLoading: boolean;
   error: unknown;
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 const MovieGrid = ({
@@ -16,6 +20,9 @@ const MovieGrid = ({
   subtitle,
   isLoading,
   error,
+  page = 1,
+  totalPages = 1,
+  onPageChange,
 }: MovieGridProps) => {
   if (isLoading || !movies) {
     return (
@@ -57,6 +64,14 @@ const MovieGrid = ({
           <MovieCard key={movie.id} movie={movie} />
         ))}
       </div>
+
+      {onPageChange && (
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   );
 };
